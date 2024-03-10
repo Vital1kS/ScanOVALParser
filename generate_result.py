@@ -4,6 +4,7 @@ import sys
 import os
 from bs4 import BeautifulSoup
 
+
 def resource_path(relative_path):
     try:
         base_path = sys._MEIPASS
@@ -37,7 +38,7 @@ def generate_csv(report_name):
         level_reader = csv.reader(level,delimiter=';',quotechar='|')
         for level_elem in level_reader:
             level_dict[level_elem[0].strip()[1:]] = level_elem[1].split(",")
-    with open('result.csv', 'w',newline='') as csvfile:
+    with codecs.open('result.csv', 'w',encoding='utf_8_sig') as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=';', quotechar='|')
         csvwriter.writerow(["№","Наименование уязвимости","CVE","CWE","Capec High","Capec Medium","Capec Low","No chance"])
         number = 0
@@ -54,23 +55,25 @@ def generate_csv(report_name):
                     number+=1
                     temp_row = row.copy()
                     temp_row[0] = number
-                    temp_row[3] = "CWE-"+cwe
-                    for capec in capec_dict[cwe.strip()]:
-                        if capec.strip() != '-':
-                            if level_dict[capec.strip()][0] == "High":
-                                temp_row[4] += capec+", "
-                            elif level_dict[capec.strip()][0] == "Medium":
-                                temp_row[5] += capec+", "
-                            elif level_dict[capec.strip()][0] == "Low":
-                                temp_row[6] += capec+", "
-                            else:
-                                temp_row[7] += capec+", "
-                    temp_row[4] = temp_row[4][:-2]
-                    temp_row[5] = temp_row[5][:-2]
-                    temp_row[6] = temp_row[6][:-2]
-                    temp_row[7] = temp_row[7][:-2]
+                    if(cwe != '-'):
+                        temp_row[3] = "CWE-"+cwe
+                        for capec in capec_dict[cwe.strip()]:
+                            if capec.strip() != '-':
+                                if level_dict[capec.strip()][0] == "High":
+                                    temp_row[4] += capec+", "
+                                elif level_dict[capec.strip()][0] == "Medium":
+                                    temp_row[5] += capec+", "
+                                elif level_dict[capec.strip()][0] == "Low":
+                                    temp_row[6] += capec+", "
+                                else:
+                                    temp_row[7] += capec+", "
+                        temp_row[4] = temp_row[4][:-2]
+                        temp_row[5] = temp_row[5][:-2]
+                        temp_row[6] = temp_row[6][:-2]
+                        temp_row[7] = temp_row[7][:-2]
                     csvwriter.writerow(temp_row)
         csvfile.close()
+
 for filename in os.listdir("."):
     if os.path.isfile(filename):
         if filename.endswith(".html"):
